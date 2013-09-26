@@ -12,7 +12,7 @@
 
 // If we were booted properly by the bootloader,
 // this should be the value
-#define MULTIBOOT_COMPLIANT 0x1badb001
+#define MULTIBOOT_COMPLIANT 0x2badb002
 
 /**
  * Based on spec:

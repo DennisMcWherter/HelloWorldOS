@@ -16,12 +16,7 @@ KERNEL = bin/kernel.bin
 LD_SRC = etc/linker.ld
 ASM_SRC=$(wildcard x86/*.s)
 SRC:=$(wildcard kernel/*.c)
-SRC+=$(wildcard kernel/x86/*.c)
-SRC+=$(wildcard kernel/system/*.c)
-SRC+=$(wildcard kernel/system/memory/*.c)
-SRC+=$(wildcard drivers/video/*.c)
-#SRC+=$(wildcard drivers/pit/*.c)
-#SRC+=$(wildcard drivers/keyboard/*.c)
+SRC+=$(wildcard drivers/*.c)
 SRC+=$(wildcard lib/*.c)
 
 

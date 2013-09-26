@@ -15,6 +15,7 @@
 # External C methods
 .extern kernel_init
 .extern kernel_main
+.extern write
 
 # Some defines to make things a little easier to read/understand
 # Review section 3.1.2 of mb spec
@@ -23,6 +24,9 @@
 .set MEMDATA,  0x02 # Make mem_* data present
 .set FLAGS, ALIGN | MEMDATA # Combined flags to single var for clarity
 .set CHECKSUM, -(MAGICNO + FLAGS)
+
+.section .rodata
+exit_str: .asciz "\nKernel: You can now safely power down the machine."
 
 .section .mbh
 # Layout for mb header
@@ -60,6 +64,9 @@ boot:
 
 end:
   cli # Disable interrupts
+  push exit_str
+  call write
+  add esp, 4
  
 halt:
   hlt
