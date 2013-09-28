@@ -30,7 +30,7 @@ int k_strcpy(char* dst, const char* src)
   while(*src)
     *dst++ = *src++;
   *dst = 0; // NULL terminate
-  return start;
+  return (int)start;
 }
 
 void k_memset(char* dst, int val, int len)

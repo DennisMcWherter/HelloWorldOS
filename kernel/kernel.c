@@ -8,6 +8,8 @@
  */
 
 #include "kernel.h"
+#include "mem/gdt.h"
+#include "mem/idt.h"
 
 // lib
 #include "lib/k_stdio.h"
@@ -27,6 +29,16 @@ int kernel_init(int magic, multiboot_info_t* info)
   if(init_drivers() != 0) {
     k_panic("Could not initialize drivers");
     return -1; // Failed to initialize our drivers
+  }
+
+  if(!gdt_init()) {
+    k_panic("Could not initialize gdt");
+    return -1;
+  }
+
+  if(!idt_init()) {
+    k_panic("Could not initialize idt");
+    return -1;
   }
 
   return 0;

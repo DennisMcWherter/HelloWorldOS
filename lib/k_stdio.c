@@ -8,6 +8,7 @@
  */
 
 #include "k_stdio.h"
+#include "k_string.h"
 #include "../drivers/video.h" // Use driver directly
 
 // Define builtin varargs
@@ -24,7 +25,7 @@ char hexLUT[] = "0123456789abcdef";
 int k_printf(const char* fmt, ...)
 {
   char buf[32];
-  unsigned i = 0;
+  int i = 0;
   int count = 0;
   va_list args;
 
@@ -119,7 +120,7 @@ int is_big_endian()
     char c[sizeof(int)];
   } val;
   val.x = 0xdeadbeef;
-  return val.c[0] == 0xde;
+  return val.c[0] == (char)0xde;
 }
 
 /** Static methods */
