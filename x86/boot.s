@@ -7,16 +7,25 @@
 # Multiboot specification information:
 # http://www.gnu.org/software/grub/manual/multiboot/multiboot.html#Machine-state
 #
+# We will also enable paging in here to boot in
+# the higher-half of memory space
+#
 # Author: Dennis J. McWherter, Jr.
 # MIT Lincoln Laboratory
 ##
 .intel_syntax noprefix # If prefer AT&T syntax, but I imagine mostly everyone else uses intel.
 
+##
 # External C methods
+##
 .extern kernel_init
 .extern kernel_main
 .extern write
+.extern paging_init
 
+##
+# Multiboot defines
+##
 # Some defines to make things a little easier to read/understand
 # Review section 3.1.2 of mb spec
 .set MAGICNO,  0x1badb002 # Magic number
@@ -25,26 +34,41 @@
 .set FLAGS, ALIGN | MEMDATA # Combined flags to single var for clarity
 .set CHECKSUM, -(MAGICNO + FLAGS)
 
-.section .rodata
-exit_str: .asciz "\nKernel: You can now safely power down the machine."
-
-.section .mbh
+##
+# Code section
+##
+.section .text
 # Layout for mb header
 # Review section 3.1.1 of mb spec
-.align 4 # 4-byte alignment
+.align 4 
 .long MAGICNO
 .long FLAGS
 .long CHECKSUM
 
-# Initialize a stack
-.set STACK_SIZE, 0x4000 # 2^14 = 16KB
-stack_init:
-.comm stack, STACK_SIZE
-
-.section .text
 .globl boot
-boot:
+.set boot, (_boot - 0xc0000000)
+_boot: # Address is virtual, so we call "boot" instead since we need to enable paging
+  # Setup our stack with its physical address first
   mov esp, (stack + STACK_SIZE)
+  sub esp, 0xc0000000
+  mov ebp, esp
+
+  # Our addresses are all virtual which is not good
+  # for us now since paging isn't enabled yet.
+  # Subtract virtual offset and access directly!
+  push eax
+  lea ecx, paging_init
+  sub ecx, 0xc0000000
+  call ecx
+  pop eax
+
+  # Now do a long jump into the higher half
+  lea ecx, [boot_higherhalf]
+  jmp ecx
+
+boot_higherhalf:
+  mov esp, (stack + STACK_SIZE)
+  mov ebp, esp
 
   cli # Disable interrupts
 
@@ -72,4 +96,18 @@ halt:
   hlt
   jmp halt
 
+##
+# Read-only data
+##
+.section .rodata
+exit_str: .asciz "\nKernel: You can now safely power down the machine."
+
+##
+# Initialize a stack
+##
+.section .bss
+.align 4
+.set STACK_SIZE, 0x4000 # 2^14 = 16KB
+stack_init:
+.comm stack, STACK_SIZE
 

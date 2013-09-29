@@ -3,7 +3,7 @@ CC=gcc
 ASM=as
 LINKER=ld
 
-CFLAGS=-O0 -Wall -Wextra -Wattributes -nostdlib -nodefaultlibs \
+CFLAGS=-O0 -ggdb -Wall -Wextra -Wattributes -nostdlib -nodefaultlibs \
   -nostartfiles -fno-builtin -m32
 CINC=-I.
 

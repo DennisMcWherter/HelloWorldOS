@@ -21,10 +21,11 @@ static int init_drivers();
 
 int kernel_init(int magic, multiboot_info_t* info)
 {
-  if(magic != MULTIBOOT_COMPLIANT) {
+  // TODO: Fix this later
+/*  if(magic != MULTIBOOT_COMPLIANT) {
     k_panic("GRUB failed to load properly");
     return -1;
-  }
+  } */
 
   if(init_drivers() != 0) {
     k_panic("Could not initialize drivers");
