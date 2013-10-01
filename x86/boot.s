@@ -37,13 +37,6 @@
 ##
 # Code section
 ##
-#.section .text
-# Layout for mb header
-# Review section 3.1.1 of mb spec
-#.align 4 
-#.long MAGICNO
-#.long FLAGS
-#.long CHECKSUM
 .section .text
 # Layout for mb header
 # Review section 3.1.1 of mb spec
@@ -53,16 +46,14 @@
 .long CHECKSUM
 
 .globl boot
-boot: # Address is virtual, so we call "boot" instead since we need to enable paging
+boot: # Entry point
   # Setup our stack with its physical address first
   mov esp, (stack + STACK_SIZE)
   mov ebp, esp
 
-  # Our addresses are all virtual which is not good
-  # for us now since paging isn't enabled yet.
-  # Subtract virtual offset and access directly!
+  # Save GRUB info
   push eax
-  call paging_enable
+  call paging_enable # Black-box, but very important
   pop eax
 
   # Now do a long jump into the higher half
@@ -76,6 +67,7 @@ boot_higherhalf:
 
   # Call our init method
   # int kernel_init(int magic, multiboot_info_t* info)
+  add  ebx, 0xc0000000 # GRUB gave us a phys addr
   push ebx # Multiboot structure
   push eax # Magic number
   call kernel_init

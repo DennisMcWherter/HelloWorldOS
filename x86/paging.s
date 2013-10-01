@@ -135,8 +135,8 @@ page_tables:
 paging_enable:
   # Follow calling conventions, I guess :P
   push ebp
-  mov ebp, esp
-  push ebx
+  mov  ebp, esp
+  push ebx # Callee-saved register
 
   # First thing's first-- get our PDE's setup.
   lea ecx, [page_directory]
@@ -163,15 +163,16 @@ paging_enable:
   # NOTE: I calculated these indices in a similar
   # manner as above.
   # Use new page table idx 1
+  lea edx, [stack] # Use this to find pd offset
+  shr edx, 22 # pd index
   lea eax, [page_tables+4096] # 1024 entries/table * 4B/entry
-  lea ecx, [page_directory+8]
+  lea ecx, [page_directory+edx*4]
   or  eax, 0x00000003
   mov [ecx], eax
   mov [ecx+((KERNEL_PDE_IDX)*4)], eax
   xor eax, 0x00000003
 
   # Setup translations
-  #mov ebx, 0x00907003
   lea ebx, [stack]
   and ebx, 0xfffff000 # Clear offset bits
   or  ebx, 0x00000003 # Control bits
@@ -187,19 +188,6 @@ paging_enable:
   or  ebx, ecx  # Update index
   shr ecx, 0x0c # Back to index only
   mov [eax+ecx*4], ebx
-
-#  mov ecx, 0x03 # Initialize 4KB worth (whole stack)
-#stack_init_loop:
-#  mov edx, ebx
-#  and edx, 0x003ff000 # Take middle 10 bits
-#  shr edx, 0x0c # Shift 12 bits to get just the pte idx
-#  #mov [eax+0x107*4], ebx
-#  #mov ebx, 0x00908003
-#  #mov [eax+0x108*4], ebx
-#  inc ecx
-#  cmp ecx, 0x1000 # Initialize 4KB worth
-#  test ecx, ecx
-#  jne stack_init_loop
 
   # Now we're finally ready to actually enable paging
   # First, load address of page directory into cr3
