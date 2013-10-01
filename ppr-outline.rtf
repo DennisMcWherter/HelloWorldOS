@@ -1,0 +1,80 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\fs24 \cf0 What this Presentation Is\
+  * A whirlwind guide to practical OS building on x86 architecture\
+  * An example of essential kernel code with minimal bloat\
+    -- I do not claim this is a fully-featured kernel, though!\
+  * An attempt to increase your awareness about what the OS does\
+\
+What this Presentation is NOT:\
+  * A step-by-step how-to on creating an operating system\
+  * A guide to operating system design (we may overlook many huge concepts)\
+     -- Remember, there are entire course sequences on design alone (much less implementation)\
+\
+What do I need to know to follow along with you?\
+  * The job of an OS is to manage your system's resources and share them based on your need\
+      -- Need changes based on system type (i.e. Desktop, real-time systems, etc.).'\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0   * A kernel is the central component of an operating system. It is, more or less, the program that IS your OS\
+  * There are different kernel design methodologies (monolithic kernel vs. microkernel)\
+     -- We won't talk about this much more, but you should know these exist\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0   * Some C and x86 knowledge wouldn't hurt\
+\
+What tools do I need?\
+  * C compiler\
+     -- We will use gcc\
+  * x86 assembler\
+     -- We will, again, focus on gcc but perhaps masm is another good choice\
+     -- We get nothing for free (i.e. libc), so writing architecture-dependent code is absolutely essential\
+  * An emulator\
+     -- On a Linux environment, either QEMU or Bochs work well\
+\
+Where do I begin?\
+  * With what you have!\
+    -- We assume you already have a PC which is properly working with an x86 processor\
+  * Bootloader\
+    -- Initializes CPU and brings it to the kernel to begin execution of OS\
+    -- Ok\'85 These can become overly-complicated too for very little pay-off since the advent of grub\
+    -- We'll assume we have grub\
+  * 
+\b Kernel
+\b0 \
+    -- We only care about the actual kernel for now\
+    -- Particularly, the x86 boot code will be our starting point\
+  * Caveat: Large programs are complicated\
+      -- (Particularly monolithic) kernels tend to have a lot of code\
+\
+What does grub do for us?\
+  * In short, jumps to our kernel code\
+  * More specifically:\
+    -- Loads kernel from filesystem (based on where you put it during setup)\
+    -- Enables protected mode\
+    -- Other cool stuff\
+  * http://www.gnu.org/software/grub/manual/multiboot/multiboot.html is important here\
+\
+Great, how do I initialize my kernel?\
+  * x86 assembly\
+    -- Yes, this is hand-written\
+    -- C is good, but it cannot accomplish everything\
+  * The Steps:\
+    -- Initialize your stack\
+    -- Global initialization method at defined segment\
+    -- Push necessary information from Machine state (defined in multiboot spec) as arguments\
+    -- Disable interrupts\
+    -- Call kernel_init (C)\
+    -- Re-enable interrupts\
+    -- Call kernel_main (C)\
+\
+kernel_init\
+\
+So where can I find this information myself?\
+  * Manuals\
+    -- Intel, ARM, etc. any architecture manual should explain how to initialize the CPU\
+  * osdev.org\
+  * For design/theory: Tannenbaum writes a good intro book\
+}
