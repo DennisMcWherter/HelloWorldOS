@@ -8,6 +8,7 @@
  */
 
 #include "kernel.h"
+#include "mem/paging.h"
 #include "mem/gdt.h"
 #include "mem/idt.h"
 
@@ -21,11 +22,12 @@ static int init_drivers();
 
 int kernel_init(int magic, multiboot_info_t* info)
 {
-  // TODO: Fix this later
-/*  if(magic != MULTIBOOT_COMPLIANT) {
+  // First thing's first.. Setup paging properly
+  //paging_init();
+  if(magic != MULTIBOOT_COMPLIANT) {
     k_panic("GRUB failed to load properly");
     return -1;
-  } */
+  } 
 
   if(init_drivers() != 0) {
     k_panic("Could not initialize drivers");

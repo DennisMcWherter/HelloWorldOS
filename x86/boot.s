@@ -21,7 +21,7 @@
 .extern kernel_init
 .extern kernel_main
 .extern write
-.extern paging_init
+.extern paging_enable
 
 ##
 # Multiboot defines
@@ -37,6 +37,13 @@
 ##
 # Code section
 ##
+#.section .text
+# Layout for mb header
+# Review section 3.1.1 of mb spec
+#.align 4 
+#.long MAGICNO
+#.long FLAGS
+#.long CHECKSUM
 .section .text
 # Layout for mb header
 # Review section 3.1.1 of mb spec
@@ -46,28 +53,23 @@
 .long CHECKSUM
 
 .globl boot
-.set boot, (_boot - 0xc0000000)
-_boot: # Address is virtual, so we call "boot" instead since we need to enable paging
+boot: # Address is virtual, so we call "boot" instead since we need to enable paging
   # Setup our stack with its physical address first
   mov esp, (stack + STACK_SIZE)
-  sub esp, 0xc0000000
   mov ebp, esp
 
   # Our addresses are all virtual which is not good
   # for us now since paging isn't enabled yet.
   # Subtract virtual offset and access directly!
   push eax
-  lea ecx, paging_init
-  sub ecx, 0xc0000000
-  call ecx
+  call paging_enable
   pop eax
 
   # Now do a long jump into the higher half
-  lea ecx, [boot_higherhalf]
-  jmp ecx
+  jmp (boot_higherhalf+0xc0000000)
 
 boot_higherhalf:
-  mov esp, (stack + STACK_SIZE)
+  mov esp, (stack + STACK_SIZE + 0xc0000000)
   mov ebp, esp
 
   cli # Disable interrupts
@@ -106,8 +108,8 @@ exit_str: .asciz "\nKernel: You can now safely power down the machine."
 # Initialize a stack
 ##
 .section .bss
-.align 4
-.set STACK_SIZE, 0x4000 # 2^14 = 16KB
-stack_init:
+.align 0x04 # 4-byte aligned
+.set STACK_SIZE, 0x1000 # 2^12 = 4KB - 1 page
+.globl stack
 .comm stack, STACK_SIZE
 

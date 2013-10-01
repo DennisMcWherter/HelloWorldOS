@@ -23,6 +23,7 @@
 .globl KERNEL_VIRT_BASE
 .set KERNEL_VIRT_BASE, 0xc0000000
 .set KERNEL_PDE_IDX, (KERNEL_VIRT_BASE >> 22)
+.extern stack
 
 ##
 # Data section (used for paging tricks)
@@ -128,8 +129,8 @@ page_tables:
 # enable paging. Let's go.
 ##
 .section .text
-.globl paging_init
-paging_init:
+.globl paging_enable
+paging_enable:
   # Follow calling conventions, I guess :P
   push ebp
   mov ebp, esp
@@ -137,20 +138,18 @@ paging_init:
 
   # First thing's first-- get our PDE's setup.
   lea ecx, [page_directory]
-  sub ecx, KERNEL_VIRT_BASE # Remember, no paging yet-- use phys addr
 
   # Calculate the table address for the PDE to index
   # These address MUST be physical for the CPU to locate
   # them.
   lea eax, [page_tables]
-  sub eax, KERNEL_VIRT_BASE 
   or  eax, 0x00000003 # Control bits for page
   mov [ecx], eax # This is the direct-mapping
   mov [ecx+(KERNEL_PDE_IDX*4)], eax # Map for 0xc0000000 
 
   # Actually update the PTE
   xor eax, 0x00000003 # Clear control bits
-  mov ebx, 0x00100003 # Only first 4MB to get our feet off the ground
+  mov ebx, 0x00100003 # Only first 4KB to get our feet off the ground
   mov [eax+0x400], ebx # Remember this offset was calculated
                        # Above. Also sizeof(long) == 4
                        # So index (0x100) * 4 = 0x400 offset
@@ -161,25 +160,48 @@ paging_init:
   # These are only temporarily hardcoded
   # NOTE: I calculated these indices in a similar
   # manner as above.
-  #lea eax, [page_tables+4096]
-  #sub eax, KERNEL_VIRT_BASE
+  # Use new page table idx 1
+  lea eax, [page_tables+4096] # 1024 entries/table * 4B/entry
   lea ecx, [page_directory+8]
-  sub ecx, KERNEL_VIRT_BASE
-  # Hack: We are just going to use the same page table
   or  eax, 0x00000003
   mov [ecx], eax
-  mov [ecx+(KERNEL_PDE_IDX*4)], eax
+  mov [ecx+((KERNEL_PDE_IDX)*4)], eax
   xor eax, 0x00000003
+
   # Setup translations
-  mov ebx, 0x0090a003
-  mov [eax+0x10a*4], ebx
-  mov ebx, 0x0090b003
-  mov [eax+0x10b*4], ebx
+  #mov ebx, 0x00907003
+  lea ebx, [stack]
+  and ebx, 0xfffff000 # Clear offset bits
+  or  ebx, 0x00000003 # Control bits
+  mov ecx, ebx
+  and ecx, 0x003ff000 # Get the pte idx
+  shr ecx, 0x0c # Shift to isolate idx
+  mov [eax+ecx*4], ebx
+  # Hack: I noticed we also get +0x1000, so map that too
+  # to be safe.
+  add ecx, 0x01 # Increment the index by 1
+  shl ecx, 0x0c # Shift to index position
+  and ebx, 0xffc00fff # Clear the index in address
+  or  ebx, ecx  # Update index
+  shr ecx, 0x0c # Back to index only
+  mov [eax+ecx*4], ebx
+
+#  mov ecx, 0x03 # Initialize 4KB worth (whole stack)
+#stack_init_loop:
+#  mov edx, ebx
+#  and edx, 0x003ff000 # Take middle 10 bits
+#  shr edx, 0x0c # Shift 12 bits to get just the pte idx
+#  #mov [eax+0x107*4], ebx
+#  #mov ebx, 0x00908003
+#  #mov [eax+0x108*4], ebx
+#  inc ecx
+#  cmp ecx, 0x1000 # Initialize 4KB worth
+#  test ecx, ecx
+#  jne stack_init_loop
 
   # Now we're finally ready to actually enable paging
   # First, load address of page directory into cr3
   lea eax, [page_directory]
-  sub eax, KERNEL_VIRT_BASE
   mov cr3, eax
 
   # Now, do the following to enable paging :)
