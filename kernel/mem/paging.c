@@ -11,14 +11,10 @@
 
 extern unsigned KERNEL_VIRT_BASE;
 #define KERNEL_PDE_INDEX (KERNEL_VIRT_BASE >> 22)
+extern unsigned page_directory[1024];
+extern unsigned page_tables[1024][1024];
 
-// Look at figures 4-5 and 4-6 in Intel Manual
-// as well as the text in section 4.2
-// for more information on how I came up with this
-static unsigned __attribute__((__packed__)) __attribute__((aligned(0x1000))) page_directory[1024];
-static unsigned __attribute__((__packed__)) __attribute__((aligned(0x1000))) page_tables[1024][1024];
-
-int pging_init()
+int paging_init()
 {
   int i = 0, j = 0;
   unsigned* pd = (unsigned*)(page_directory - KERNEL_VIRT_BASE);

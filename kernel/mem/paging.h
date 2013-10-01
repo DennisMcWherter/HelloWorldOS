@@ -10,7 +10,7 @@
 #ifndef KERNEL_MEM_PAGING_H__
 #define KERNEL_MEM_PAGING_H__
 
-int pging_init();
+int paging_init();
 
 #endif /** KERNEL_MEM_PAGING_H__ */
 

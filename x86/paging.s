@@ -93,6 +93,7 @@
 # perform initialization in the init method below,
 # here we just set everything to 0.
 ##
+.globl page_directory
 page_directory:
 .rept 1024
   .long 0
@@ -108,6 +109,7 @@ page_directory:
 # in memory. We will initialize these entires similarly
 # to the pde.
 ##
+.globl page_tables
 page_tables:
 # All page table entries. Initialize to 0
 .rept 1024
