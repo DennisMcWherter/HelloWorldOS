@@ -11,7 +11,7 @@
 #include "video.h"
 
 //#define VID_MEM_ADDR 0xc00b8000
-#define VID_MEM_ADDR 0xb8000
+#define VID_MEM_ADDR 0xc00b8000
 #define VID_HEIGHT 25
 #define VID_WIDTH 160
 

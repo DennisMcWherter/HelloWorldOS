@@ -45,10 +45,14 @@
 .long FLAGS
 .long CHECKSUM
 
+# This is in the text section to access for paging_init
+.globl KERNEL_VIRT_BADDR
+KERNEL_VIRT_BADDR: .long 0xc0000000
+
 .globl boot
 boot: # Entry point
   # Setup our stack with its physical address first
-  mov esp, (stack + STACK_SIZE)
+  mov esp, (stack + STACK_SIZE - 0xc0000000)
   mov ebp, esp
 
   # Save GRUB info
@@ -60,7 +64,7 @@ boot: # Entry point
   jmp (boot_higherhalf+0xc0000000)
 
 boot_higherhalf:
-  mov esp, (stack + STACK_SIZE + 0xc0000000)
+  mov esp, (stack + STACK_SIZE)# + 0xc0000000)
   mov ebp, esp
 
   cli # Disable interrupts
@@ -82,9 +86,10 @@ boot_higherhalf:
 
 end:
   cli # Disable interrupts
-  push exit_str
-  call write
-  add esp, 4
+  # TODO: Check string is properly terminated (i.e. this crashes)
+  #push exit_str
+  #call write
+  #add esp, 4
  
 halt:
   hlt
@@ -94,14 +99,14 @@ halt:
 # Read-only data
 ##
 .section .rodata
-exit_str: .asciz "\nKernel: You can now safely power down the machine."
+exit_str: .asciz "\nKernel: You can now safely power down the machine.\0"
 
 ##
 # Initialize a stack
 ##
 .section .bss
 .align 0x04 # 4-byte aligned
-.set STACK_SIZE, 0x1000 # 2^12 = 4KB - 1 page
+.set STACK_SIZE, 0x2000 # 2^14 = 8KB - 2 pages
 .globl stack
-.comm stack, STACK_SIZE
+.comm stack, STACK_SIZE, 0x1000
 

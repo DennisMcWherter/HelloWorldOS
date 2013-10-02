@@ -23,19 +23,20 @@ SECTIONS
     *(.text)
   }
 
-  .rodata ALIGN(0x1000) : 
+  . += 0xc0000000;
+
+  .rodata ALIGN(0x1000) : AT(ADDR(.rodata) - 0xc0000000)
   {
     *(.rodata)
   }
   
-  .data ALIGN(0x1000) : 
+  .data ALIGN(0x1000) : AT(ADDR(.data) - 0xc0000000)
   {
     *(.data)
   }
 
-  .bss : 
+  .bss : AT(ADDR(.bss) - 0xc0000000)
   {
-    *(.stack_init)
     *(.bss)
     *(.COMMON)
   }
@@ -44,8 +45,8 @@ SECTIONS
    * These symbols tell use exactly where the end of our
    * memory is. This is good for virtual memory, etc.
    */
-  mem_end_virt = . + 0xc0000000;
-  mem_end_phys = .;
+  _mem_end_virt = .;
+  _mem_end_phys = . - 0xc0000000;
 }
 OUTPUT(bin/kernel.bin)
 

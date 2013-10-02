@@ -22,9 +22,10 @@ static int init_drivers();
 
 int kernel_init(int magic, multiboot_info_t* info)
 {
-  // First thing's first.. Setup paging properly
-  //paging_init();
   if(magic != MULTIBOOT_COMPLIANT) {
+    // Honestly, we would probably crash in k_panic
+    // since we don't map the portion of the stack
+    // that the string is on.
     k_panic("GRUB failed to load properly");
     return -1;
   } 
@@ -34,10 +35,11 @@ int kernel_init(int magic, multiboot_info_t* info)
     return -1; // Failed to initialize our drivers
   }
 
+/*
   if(!gdt_init()) {
     k_panic("Could not initialize gdt");
     return -1;
-  }
+  }*/
 
   if(!idt_init()) {
     k_panic("Could not initialize idt");

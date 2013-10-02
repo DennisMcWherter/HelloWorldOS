@@ -1,11 +1,9 @@
 ##
 # x86/paging.s
 #
-# So I tried to do this in C to make things more
-# readable, but I failed since I'm tired. For me,
-# the x86 is a little more intuitve since we're
-# not doing too much to throw data between the two
-# languages.
+# I originally did this in x86
+# but it became ugly looking.
+# I do most of this in C now (though still ugly!)
 #
 # Author: Dennis J. McWherter, Jr.
 # MIT Lincoln Laboratory
@@ -20,10 +18,18 @@
 #   (addr >> 12) & 0x3ff == page table index (middle 10 bits)
 #   addr & 0xfff == page index (lower 12 bits)
 # 10 bits + 10 bits + 12 bits == full 32-bit address
-.globl KERNEL_VIRT_BASE
 .set KERNEL_VIRT_BASE, 0xc0000000
 .set KERNEL_PDE_IDX, (KERNEL_VIRT_BASE >> 22)
+.extern paging_init
 .extern stack
+.extern mem_end_phys
+
+# Eh-- this is bad. But can't remember how
+# to make .set global right now. I guess it means
+# we either remember there are two instances
+# (one more in boot) or leave the kernel stack
+# at 8KB :)
+.set STACK_SIZE, 0x2000 # 2^14 = 8KB - 2 pages
 
 ##
 # Data section (used for paging tricks)
@@ -118,6 +124,11 @@ page_tables:
   .endr
 .endr
 
+# Virtual to physical addresses
+.set __page_directory, (page_directory - 0xc0000000)
+.set __page_tables, (page_tables - 0xc0000000)
+.set __stack, (stack + STACK_SIZE - 0xc0000000)
+
 ##
 # Important paging methods
 ##
@@ -131,6 +142,19 @@ page_tables:
 # enable paging. Let's go.
 ##
 .section .text
+.align 4
+# Global vars for C code
+.globl _num_entries
+.globl _lowermem
+.globl _uppermem
+.globl _page_directory
+.globl _page_tables
+_num_entries: .long 1024
+_lowermem: .long 256
+_uppermem: .long 768
+_page_directory: .long (page_directory - KERNEL_VIRT_BASE)
+_page_tables: .long (page_tables - KERNEL_VIRT_BASE)
+
 .globl paging_enable
 paging_enable:
   # Follow calling conventions, I guess :P
@@ -138,60 +162,13 @@ paging_enable:
   mov  ebp, esp
   push ebx # Callee-saved register
 
-  # First thing's first-- get our PDE's setup.
-  lea ecx, [page_directory]
+  # This will setup identity and higher-half map
+  # for first 1GB of memory
+  call paging_init
 
-  # Calculate the table address for the PDE to index
-  # These address MUST be physical for the CPU to locate
-  # them.
-  lea eax, [page_tables]
-  or  eax, 0x00000003 # Control bits for page
-  mov [ecx], eax # This is the direct-mapping
-  mov [ecx+(KERNEL_PDE_IDX*4)], eax # Map for 0xc0000000 
-
-  # Actually update the PTE
-  xor eax, 0x00000003 # Clear control bits
-  mov ebx, 0x00100003 # Only first 4KB to get our feet off the ground
-  mov [eax+0x400], ebx # Remember this offset was calculated
-                       # Above. Also sizeof(long) == 4
-                       # So index (0x100) * 4 = 0x400 offset
-
-  # Now that we have code working, do the same thing
-  # For our stack until we can run the memory manager
-  # to get things working properly.
-  # These are only temporarily hardcoded
-  # NOTE: I calculated these indices in a similar
-  # manner as above.
-  # Use new page table idx 1
-  lea edx, [stack] # Use this to find pd offset
-  shr edx, 22 # pd index
-  lea eax, [page_tables+4096] # 1024 entries/table * 4B/entry
-  lea ecx, [page_directory+edx*4]
-  or  eax, 0x00000003
-  mov [ecx], eax
-  mov [ecx+((KERNEL_PDE_IDX)*4)], eax
-  xor eax, 0x00000003
-
-  # Setup translations
-  lea ebx, [stack]
-  and ebx, 0xfffff000 # Clear offset bits
-  or  ebx, 0x00000003 # Control bits
-  mov ecx, ebx
-  and ecx, 0x003ff000 # Get the pte idx
-  shr ecx, 0x0c # Shift to isolate idx
-  mov [eax+ecx*4], ebx
-  # Hack: I noticed we also get +0x1000, so map that too
-  # to be safe.
-  add ecx, 0x01 # Increment the index by 1
-  shl ecx, 0x0c # Shift to index position
-  and ebx, 0xffc00fff # Clear the index in address
-  or  ebx, ecx  # Update index
-  shr ecx, 0x0c # Back to index only
-  mov [eax+ecx*4], ebx
-
-  # Now we're finally ready to actually enable paging
-  # First, load address of page directory into cr3
-  lea eax, [page_directory]
+  ## Now we're finally ready to actually enable paging
+  ## First, load address of page directory into cr3
+  lea eax, [__page_directory]
   mov cr3, eax
 
   # Now, do the following to enable paging :)
