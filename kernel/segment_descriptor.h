@@ -1,5 +1,5 @@
 /**
- * kernel/mem/segment_descriptor.h
+ * kernel/segment_descriptor.h
  *
  * Struct describing a segment descriptor
  * Refer to Intel Manual section 3.4.5
@@ -9,8 +9,8 @@
  * MIT Lincoln Laboratory
  */
 
-#ifndef KERNEL_MEM_SEGMENT_DESCRIPTOR_H__
-#define KERNEL_MEM_SEGMENT_DESCRIPTOR_H__
+#ifndef KERNEL_SEGMENT_DESCRIPTOR_H__
+#define KERNEL_SEGMENT_DESCRIPTOR_H__
 
 /**
  * Segment descriptor structure
@@ -109,5 +109,5 @@ typedef struct
   unsigned short map_base;
 } __attribute__((__packed__)) tss_desc_t;
 
-#endif /** KERNEL_MEM_SEGMENT_DESCRIPTOR_H__ */
+#endif /** KERNEL_SEGMENT_DESCRIPTOR_H__ */
 

@@ -1,5 +1,5 @@
 /**
- * kernel/mem/idt.h
+ * kernel/interrupt/idt.h
  *
  * Interrupt descriptor table header
  *
@@ -7,10 +7,10 @@
  * MIT Lincoln Laboratory
  */
 
-#ifndef KERNEL_MEM_IDT_H__
-#define KERNEL_MEM_IDT_H__
+#ifndef KERNEL_INTERRUPT_IDT_H__
+#define KERNEL_INTERRUPT_IDT_H__
 
-#include "segment_descriptor.h"
+#include "../segment_descriptor.h"
 
 /**
  * IDT gate
@@ -76,5 +76,5 @@ extern void isr29();
 extern void isr30();
 extern void isr31();
 
-#endif /** KERNEL_MEM_IDT_H__ */
+#endif /** KERNEL_INTERRUPT_IDT_H__ */
 

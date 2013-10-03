@@ -21,8 +21,7 @@ extern unsigned _uppermem;
 
 int paging_init()
 {
-  int i = 0, j = 0;
-  unsigned* page_table = 0;
+  unsigned i = 0, j = 0;
   unsigned ident_addr = 0;
   unsigned kernel_pde_off = (KERNEL_VIRT_BADDR >> 22);
 

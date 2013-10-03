@@ -17,7 +17,7 @@
 isr\num:
   cli # Disable interrupts while we handle
   push \num
-  jmp isr_handler
+  jmp isr_handler # Jump is important! We want same stackframe
 .endm
 
 # void idt_load(idt_t*);
@@ -28,7 +28,8 @@ idt_load:
   ret
 
 isr_handler:
-  # Save our state
+  # Save our registers
+  # Push EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
   pusha
 
   mov ax, ds
@@ -51,8 +52,8 @@ isr_handler:
   mov fs, cx
   mov gs, cx
 
-  popa
-  add esp, 0x04 # Pop arguments
+  popa # Pop the registers we saved
+  add esp, 0x04 # Pop the intno arg
   sti # Re-enable interrupts
   iret # Return from interrupt
 

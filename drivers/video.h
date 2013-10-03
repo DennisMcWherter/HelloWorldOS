@@ -39,9 +39,10 @@ typedef enum
 
 // Methods
 int video_init();
-void write(const char*);
-void write_color(const char*, VID_COLOR);
-void write_char(char, VID_COLOR);
+void video_write(const char*);
+void video_write_color(const char*, VID_COLOR);
+void video_write_char(char, VID_COLOR);
+void video_nextline();
 
 #endif /** DRIVERS_VIDEO_H__ */
 

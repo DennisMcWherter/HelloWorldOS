@@ -22,18 +22,18 @@ static void clear_screen();
 int video_init()
 {
   clear_screen(); // Clear the screen
-  return 0;
+  return 1;
 }
 
-void write(const char* s)
+void video_write(const char* s)
 {
-  write_color(s, LGRAY);
+  video_write_color(s, LGRAY);
 }
 
-void write_color(const char* s, VID_COLOR color)
+void video_write_color(const char* s, VID_COLOR color)
 {
   for( ; *s ; ++s) {
-    write_char(*s, color);
+    video_write_char(*s, color);
   }
 }
 
@@ -41,10 +41,31 @@ void write_color(const char* s, VID_COLOR color)
 // The graphics array is a flat array
 // Even byte: character to print
 // Odd byte: color of character and relevant attribute
-void write_char(char c, VID_COLOR color)
+void video_write_char(char c, VID_COLOR color)
 {
+  if(vidptr >= (VID_MEM_ADDR + (VID_WIDTH * VID_HEIGHT))) {
+    clear_screen(); // Scroll to top
+  }
   *vidptr++ = c;
   *vidptr++ = color;
+}
+
+/**
+ * Move the cursor down a line
+ */
+void video_nextline()
+{
+  // TODO:
+  // Eventually want to scroll... Right now
+  // We just jump back to the top
+  unsigned nextLine = 0, currLine = 0;
+  currLine = (((unsigned)vidptr - VID_MEM_ADDR) / VID_WIDTH);
+  nextLine = (currLine + 1) % VID_HEIGHT;
+  if(nextLine == 0) { // Clear the entire screen and jump to top
+    clear_screen(); // Perhaps this is most visually pleasing?
+  } else { // Update the video pointer
+    vidptr = (unsigned char*)(VID_MEM_ADDR + (nextLine * VID_WIDTH));
+  }
 }
 
 /** Static methods */

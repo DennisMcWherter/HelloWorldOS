@@ -9,7 +9,7 @@
 
 #include "k_stdio.h"
 #include "k_string.h"
-#include "../drivers/video.h" // Use driver directly
+#include <drivers/video.h> // Use driver directly
 
 // Define builtin varargs
 #define va_list __builtin_va_list
@@ -32,7 +32,7 @@ int k_printf(const char* fmt, ...)
   va_start(args, fmt);
   // Determine how many arguments we have
   // This is an over-simplified printf
-  for(i = 0 ; i < fmt[i] ; ++i) {
+  for(i = 0 ; fmt[i] ; ++i) {
     switch(fmt[i]) {
       case '%':
         fmt++; // Advance pointer
@@ -43,13 +43,13 @@ int k_printf(const char* fmt, ...)
           case 'd':
             k_memset(buf, 0, sizeof(buf));
             k_itoa(buf, va_arg(args, int), 10);
-            write(buf);
+            video_write(buf);
             count += k_strlen(buf);
             break;
           case 'x':
             k_memset(buf, 0, sizeof(buf));
             k_itoa(buf, va_arg(args, unsigned), 16);
-            write(buf);
+            video_write(buf);
             count += k_strlen(buf);
             break;
           case '%':
@@ -62,8 +62,8 @@ int k_printf(const char* fmt, ...)
         break;
       case '\r':
       case '\n':
-        // TODO: Implement newline functionality
-        // Don't forget to increment count
+        video_nextline();
+        count++;
         break;
       default: // Write the char
         k_putc(fmt[i]);
@@ -78,13 +78,13 @@ int k_printf(const char* fmt, ...)
 
 void k_panic(const char* msg)
 {
-  write_color("!!!PANIC: ", RED);
-  write(msg);
+  video_write_color("!!!PANIC: ", RED);
+  video_write(msg);
 }
 
 int k_putc(char c)
 {
-  write_char(c, LGRAY);
+  video_write_char(c, LGRAY);
   return (int)c;
 }
 

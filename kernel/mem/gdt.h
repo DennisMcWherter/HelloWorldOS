@@ -11,7 +11,7 @@
 #ifndef KERNEL_MEM_GDT_H__
 #define KERNEL_MEM_GDT_H__
 
-#include "segment_descriptor.h"
+#include "../segment_descriptor.h"
 
 /**
  * Global descriptor table
