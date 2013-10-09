@@ -38,7 +38,15 @@ typedef struct
   unsigned vbe_mode_info;
   unsigned short vbe_mode;
   unsigned short vbe_interface_seg, vbe_interface_off, vbe_interface_len;
-} multiboot_info_t;
+} __attribute__((__packed__)) multiboot_info_t;
+
+typedef struct
+{
+  unsigned size;
+  unsigned base_lo, base_hi;
+  unsigned length_lo, length_hi;
+  unsigned type;
+} __attribute__((__packed__)) multiboot_mmap_t;
 
 #endif /** KERNEL_KERNEL_H__ */
 

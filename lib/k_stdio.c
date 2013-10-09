@@ -76,10 +76,21 @@ int k_printf(const char* fmt, ...)
   return count;
 }
 
+void k_success(const char* msg)
+{
+  video_write("[");
+  video_write_color("SUCCESS", GREEN);
+  video_write("] ");
+  k_printf(msg);
+}
+
 void k_panic(const char* msg)
 {
-  video_write_color("!!!PANIC: ", RED);
-  video_write(msg);
+  video_write("[");
+  video_write_color("!!!PANIC", RED);
+  video_write("] ");
+//  video_write(msg);
+  k_printf(msg);
 }
 
 int k_putc(char c)
