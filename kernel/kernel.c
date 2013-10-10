@@ -9,9 +9,12 @@
 
 #include "kernel.h"
 
-#include <kernel/mem/paging.h>
-#include <kernel/mem/gdt.h>
+// Memory and interrupt
 #include <kernel/interrupt/idt.h>
+#include <kernel/interrupt/interrupt_handler.h>
+#include <kernel/mem/kheap.h>
+#include <kernel/mem/gdt.h>
+#include <kernel/mem/paging.h>
 
 // lib
 #include <lib/k_stdio.h>
@@ -27,7 +30,8 @@ static int init_drivers();
 
 int kernel_init(int magic, multiboot_info_t* info)
 {
-  multiboot_mmap_t* mmap = 0;
+  //multiboot_mmap_t* mmap = 0;
+  //unsigned mmap_end = 0;
 
   if(magic != MULTIBOOT_COMPLIANT) {
     k_panic("GRUB failed to load properly");
@@ -35,22 +39,29 @@ int kernel_init(int magic, multiboot_info_t* info)
   } 
 
   /** Detect memory */
-  if(!(info->flags & 0x06)) {
+  /*if(!(info->flags & 0x20)) {
     k_panic("Could not detect memory size");
     return -1;
   }
 
   // Using code from multiboot spec
-  /*
-  // TODO: Memory detection
-  for(mmap = (multiboot_mmap_t*)info->mmap_addr
-    ; mmap < info->mmap_addr + info->mmap_length 
-    ; mmap = mmap + mmap->size + sizeof(mmap->size)) {
-    total_memsize += mmap->size;
+   TODO: Eventually detect
+  k_printf("Detecting memory...");
+  mmap = (multiboot_mmap_t*)(info->mmap_addr + 0xc0000000);
+  mmap_end = (unsigned)mmap + info->mmap_length;
+  while(mmap < mmap_end) {
+    if(mmap->type == 1) { // This means available RAM
+      total_memsize += mmap->length_lo;
+    }
+    mmap = (unsigned)mmap + mmap->size + sizeof(mmap->size);
   }
+  k_printf("Done!\n");
   */
 
-  total_memsize = mmap->length_lo;
+  if(!kheap_init()) {
+    k_panic("Could not initialize the kernel heap");
+    return -1;
+  }
 
   /** Descriptor tables */
   if(!gdt_init()) {
@@ -69,8 +80,12 @@ int kernel_init(int magic, multiboot_info_t* info)
     return -1; // Failed to initialize our drivers
   }
 
+  // Register page fault handler
+  register_handler(0xe, page_fault);
+
   k_success("Detected memory: ");
-  k_printf("0x%x bytes\n", total_memsize); // Only 32-bit OS
+  k_printf("%d MB\n", total_memsize / 1024 / 1024); // Only 32-bit OS
+  k_success("Initialized Kernel Heap...\n");
   k_success("Initialized GDT...\n");
   k_success("Initialized IDT...\n");
   k_success("Initialized Drivers...\n");
