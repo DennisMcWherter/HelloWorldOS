@@ -103,9 +103,13 @@ void kernel_main()
 
   // Try using paging directly :S
   unsigned page = paging_alloc(0x03);
+  unsigned page2 = paging_alloc(0x03);
   k_printf("0x%x to 0x%x\n", page, *((unsigned*)page));
+  k_printf("0x%x to 0x%x\n", page2, *((unsigned*)page2));
   paging_dealloc(page); // Try it.
+  unsigned page3 = paging_alloc(0x03);
   k_printf("0x%x to 0x%x\n", page, *((unsigned*)page));
+  k_printf("0x%x to 0x%x\n", page3, *((unsigned*)page3));
   //k_itoa(strint, page, 16);
 //  k_puts(strint);
 }
