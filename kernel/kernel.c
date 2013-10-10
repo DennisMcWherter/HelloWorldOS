@@ -95,9 +95,19 @@ int kernel_init(int magic, multiboot_info_t* info)
 
 void kernel_main()
 {
-  k_printf("Sample: %d, %d, 0x%x, 0x%x, 0x%x, %d, %d\n", 10, 111, 10, 0x1337, 0, 0, -50042);
+  char strint[32];
+  k_printf("Sample: %d, %d, 0x%x, 0x%x, 0x%x, %d, %d, 0x%x\n", 10, 111, 10, 0x1337, 0, 0, -50042, 0xdeadbeef);
+
   // Test interrupts
   __asm__("\tint $0x03\nint $0x04\n");
+
+  // Try using paging directly :S
+  unsigned page = paging_alloc(0x03);
+  k_printf("0x%x to 0x%x\n", page, *((unsigned*)page));
+  paging_dealloc(page); // Try it.
+  k_printf("0x%x to 0x%x\n", page, *((unsigned*)page));
+  //k_itoa(strint, page, 16);
+//  k_puts(strint);
 }
 
 int init_drivers()

@@ -28,6 +28,14 @@ int k_printf(const char*, ...);
 int k_putc(char);
 
 /**
+ * Print a string
+ *
+ * @param const char*   String to print
+ * @return  Last character (should be 0)
+ */
+int k_puts(const char*);
+
+/**
  * Copy an integer to a string
  *
  * @param char*   Destination string

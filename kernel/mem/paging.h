@@ -50,6 +50,7 @@ typedef struct
   unsigned* page_dir; // Pointer to directory
   unsigned** page_tables; // Virtual addr
   unsigned** page_tables_phys; // Physical addr
+  unsigned** status; // Status of pages
   unsigned phys_addr; // Physical address
 } __attribute__((__packed__)) pd_t;
 
@@ -64,9 +65,10 @@ int paging_init();
  * Retrieve the next frame from the current
  * page table
  *
+ * @param perms   Permissions to set on the page
  * @return  Address to next frame
  */
-unsigned paging_next_frame();
+unsigned paging_alloc(int perms);
 
 // TODO: Implement method to switch page tables
 //       for processes

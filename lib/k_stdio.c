@@ -27,6 +27,7 @@ int k_printf(const char* fmt, ...)
   char buf[32];
   int i = 0;
   int count = 0;
+  char* str = 0;
   va_list args;
 
   va_start(args, fmt);
@@ -50,6 +51,11 @@ int k_printf(const char* fmt, ...)
             k_memset(buf, 0, sizeof(buf));
             k_itoa(buf, va_arg(args, unsigned), 16);
             video_write(buf);
+            count += k_strlen(buf);
+            break;
+          case 's':
+            str = va_arg(args, char*);
+            k_puts(str);
             count += k_strlen(buf);
             break;
           case '%':
@@ -99,9 +105,18 @@ int k_putc(char c)
   return (int)c;
 }
 
+int k_puts(const char* str)
+{
+  while(*str) {
+    k_putc(*str++);
+  }
+  return *str;
+}
+
 void k_itoa(char* buf, int val, int radix)
 {
   char* start = buf;
+  unsigned v2;
 
   // Only supporting hex and decimal for now
   radix = (radix == 16) ? radix : 10;
@@ -113,10 +128,12 @@ void k_itoa(char* buf, int val, int radix)
     val *= -1;
   }
 
+  v2 = (unsigned)val; // Do unsigned math.
+
   do {
-    *buf++ = hexLUT[(val % radix)];
-    val /= radix;
-  } while(val);
+    *buf++ = hexLUT[(v2 % radix)];
+    v2 /= radix;
+  } while(v2);
 
   // Hack: Just don't want to spend too much
   // time reimplementing c stdlib
