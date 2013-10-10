@@ -35,6 +35,8 @@ extern const unsigned total_memsize;
 
 // Book-keeping
 #define PAGE_SIZE 4096 // 4096 bytes = 4KB
+// Naive way-- this is also wasteful!
+free_pages_t free_list[1048576]; // Physical pages
 unsigned num_pages = 0;
 // 1024 entries in pde
 // 1024 entries per pde so
@@ -42,7 +44,6 @@ unsigned num_pages = 0;
 // means 1024 status bits in 32 ints.
 unsigned page_status[1024][32];
 pd_t cur_pd; // Current page directory
-unsigned cur_pt; // Current page table
 
 // Bit twiddling macroez
 // Oh noez my symbowz...
@@ -62,7 +63,8 @@ int paging_init()
   unsigned* np_addr  = (unsigned*)TO_PHYS_ADDR(&num_pages);
   unsigned* pst_phys = (unsigned*)TO_PHYS_ADDR(page_status);//(unsigned*)(((unsigned)page_status) - KERNEL_VIRT_BADDR);
   pd_t* pd_addr  = (pd_t*)TO_PHYS_ADDR(&cur_pd);//(unsigned*)(((unsigned)&cur_pd) - KERNEL_VIRT_BADDR);  
-  unsigned* pt_addr  = (unsigned*)TO_PHYS_ADDR(&cur_pt);//(unsigned*)(((unsigned)&cur_pt) - KERNEL_VIRT_BADDR);  
+  //unsigned* pt_addr  = (unsigned*)TO_PHYS_ADDR(&cur_pt);//(unsigned*)(((unsigned)&cur_pt) - KERNEL_VIRT_BADDR);  
+//  free_pages_t* free = (free_pages_t*)TO_PHYS_ADDR(free_list); 
 
   // Set all pages to unused.
   k_memset(pst_phys, 0, 1024*32);
@@ -101,9 +103,9 @@ int paging_init()
 
   // Final book-keeping setup
   pd_addr->page_dir = (unsigned*)TO_VIRT_ADDR(_page_directory);
-  pd_addr->page_status = page_status; 
+  //pd_addr->page_status = page_status; 
   pd_addr->phys_addr = _page_directory;
-  *pt_addr = (unsigned**)TO_VIRT_ADDR(_page_tables);
+  //*pt_addr = (unsigned**)TO_VIRT_ADDR(_page_tables);
 
   return 1;
 }
@@ -121,10 +123,10 @@ unsigned paging_next_frame()
     for(j = 0 ; j < 32 ; ++j) {
       for(k = 0 ; k < 32 ; ++k) {
 
-        if(!BIT_TEST(cur_pd.page_status[i][j], (1 << k))) {
+   //     if(!BIT_TEST(cur_pd.page_status[i][j], (1 << k))) {
           // use this page
-          BIT_SET(cur_pd.page_status[i][j], (1 << k));
-        }
+   //       BIT_SET(cur_pd.page_status[i][j], (1 << k));
+   //     }
       }
     }
   }

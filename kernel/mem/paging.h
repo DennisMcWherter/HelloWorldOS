@@ -15,6 +15,26 @@
 #include <kernel/registers.h>
 
 /**
+ * struct for free page list
+ */
+typedef struct _free_pages_t
+{
+  unsigned phys_addr;
+  struct _free_pages_t* next;
+} free_pages_t;
+
+/**
+ * Struct to hold page information
+ * This was adopted from James Molloy
+ * http://www.jamesmolloy.co.uk/tutorial_html/6.-Paging.html
+ */
+typedef struct
+{
+  unsigned present : 1, rw : 1, user : 1, accessed : 1,
+           dirty : 1, unused : 7, frame : 20;
+} __attribute__((__packed__)) page_t;
+
+/**
  * Struct to hold information about
  * page directory
  *
@@ -28,7 +48,8 @@
 typedef struct
 {
   unsigned* page_dir; // Pointer to directory
-  unsigned** page_status; // Pointer to status bitmap 
+  unsigned** page_tables; // Virtual addr
+  unsigned** page_tables_phys; // Physical addr
   unsigned phys_addr; // Physical address
 } __attribute__((__packed__)) pd_t;
 
