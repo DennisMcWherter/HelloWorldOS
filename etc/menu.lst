@@ -1,7 +1,0 @@
-# menu.lst
-default 0
-timeout 6
-
-title HelloWorldOS kernel 0.0.1
-  kernel=/boot/kernel.bin root=(fd0)
-

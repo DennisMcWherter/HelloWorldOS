@@ -3,9 +3,11 @@ CC=gcc
 ASM=as
 LINKER=ld
 
+LFLAGS=-melf_i386
 AFLAGS=--32#-march=i386
 CFLAGS=-O0 -ggdb -Wall -Wextra -Wattributes -nostdlib -nodefaultlibs \
   -nostartfiles -fno-builtin -m32
+#-m32
 CINC=-I.
 
 # Binary
@@ -27,10 +29,10 @@ ASM_SRC:=$(patsubst %.s, %.o, $(ASM_SRC))
 SRC:=$(patsubst %.c, %.o, $(SRC))
 
 all: $(ASM_SRC) $(SRC)
-	$(LINKER) -T $(LD_SRC) $(ASM_SRC) $(SRC) 
+	$(LINKER) -T $(LD_SRC) $(ASM_SRC) $(SRC) $(LFLAGS)
 	mkdir -p ./bin/hwos/boot/grub
 	cp -rf ./$(KERNEL) ./bin/hwos/boot
-	grub-menulst2cfg ./etc/menu.lst ./bin/hwos/boot/grub/grub.cfg
+	cp -rf ./etc/grub.cfg ./bin/hwos/boot/grub/grub.cfg
 	grub-mkrescue -o ./bin/hwos.iso ./bin/hwos
 	rm -rf ./bin/hwos
 
