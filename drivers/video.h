@@ -37,11 +37,39 @@ typedef enum
   WHITE    = 0x0f
 } VID_COLOR;
 
-// Methods
+/**
+ * Initialize video driver
+ *
+ * @return  1 on success 0 otherwise
+ */
 int video_init();
+
+/**
+ * Method to write out to screen
+ *
+ * @param const char*   NULL-terminated string to write
+ */
 void video_write(const char*);
+
+/**
+ * Write color output to screen
+ *
+ * @param const char*   NULL-terminated string to write
+ * @param VID_COLOR     Color code of the string (VGA)
+ */
 void video_write_color(const char*, VID_COLOR);
+
+/**
+ * Write a single char t othe output
+ *
+ * @param char        Character to write
+ * @param VID_COLOR   Color code of char (VGA)
+ */
 void video_write_char(char, VID_COLOR);
+
+/**
+ * Force terminal to a new line
+ */
 void video_nextline();
 
 #endif /** DRIVERS_VIDEO_H__ */

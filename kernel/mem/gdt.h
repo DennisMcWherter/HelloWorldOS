@@ -24,7 +24,11 @@ typedef struct
   segment_desc_t* base; // Pointer to the table of entries
 } __attribute__((__packed__)) gdt_t;
 
-// Method to initialize the global descriptor table
+/**
+ * Initialize global descriptor table
+ *
+ * @return  1 on success 0 otherwise
+ */
 int gdt_init();
 
 #endif /** KERNEL_MEM_GDT_H__ */
