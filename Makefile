@@ -3,6 +3,7 @@ CC=gcc
 ASM=as
 LINKER=ld
 
+AFLAGS=--32#-march=i386
 CFLAGS=-O0 -ggdb -Wall -Wextra -Wattributes -nostdlib -nodefaultlibs \
   -nostartfiles -fno-builtin -m32
 CINC=-I.
@@ -26,7 +27,7 @@ ASM_SRC:=$(patsubst %.s, %.o, $(ASM_SRC))
 SRC:=$(patsubst %.c, %.o, $(SRC))
 
 all: $(ASM_SRC) $(SRC)
-	$(LINKER) -T $(LD_SRC) $(ASM_SRC) $(SRC)
+	$(LINKER) -T $(LD_SRC) $(ASM_SRC) $(SRC) 
 	mkdir -p ./bin/hwos/boot/grub
 	cp -rf ./$(KERNEL) ./bin/hwos/boot
 	grub-menulst2cfg ./etc/menu.lst ./bin/hwos/boot/grub/grub.cfg
@@ -42,7 +43,7 @@ all: $(ASM_SRC) $(SRC)
 	$(CC) -c -o $@ $^ $(CINC) $(CFLAGS)
 
 %.o: %.s
-	$(ASM) -o $@ $<
+	$(ASM) -o $@ $< $(AFLAGS)
 
 clean:
 	rm -rf $(KERNEL) bin/*.iso $(SRC) $(ASM_SRC)
