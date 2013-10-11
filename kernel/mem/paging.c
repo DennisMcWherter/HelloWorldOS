@@ -8,7 +8,11 @@
  */
 
 #include "paging.h"
-#include "kheap.h"
+#include "kheap.h" // Goal was to use this to support our
+                   // page allocation and then create a higher
+                   // level heap manager depending on pages
+                   // to provide better granularity. That said,
+                   // busy week-- ran out of time. Sorry!
 
 #include <lib/k_stdio.h>
 #include <lib/k_string.h>
@@ -114,6 +118,10 @@ int paging_init()
 
   return 1;
 }
+
+// NOTE: The rest of this code is broken. Don't use it.
+//       I suppose that's what happens when you work on code
+//       at 3am -.-
 
 // Naive implementation for simplicity!
 unsigned paging_alloc(int control)
