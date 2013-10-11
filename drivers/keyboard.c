@@ -26,10 +26,12 @@ int keyboard_init()
 
   inb(KB_PORT); // Flush
 
+#if 0
   outb(KB_CMD, 0xaa); // Test
 
   if(inb(KB_PORT) != 0x55)
     return 0;
+#endif
 
   // Typically is 1 but since we remapped (to let processor
   // exceptions have lower addresses), it is 32 + n

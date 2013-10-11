@@ -135,11 +135,7 @@ int init_drivers()
   }
   if(!keyboard_init()) {
     k_panic("keyboard_init()\n");
-    // Don't return an error here..
-    // Realistically, this may not work
-    // if, for instance, a ps/2 keyboard
-    // is not present (i.e. my laptop)!
-    //return 0;
+    return 0;
   }
   return 1;
 }
