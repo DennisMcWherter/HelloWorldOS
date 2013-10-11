@@ -94,7 +94,7 @@ int paging_init()
     // Populate table
     ident_addr  = (i << 22); // High part of address
     ident_addr |= 0x03; // Control bits
-    for(j = 0 ; j < _num_entries ; ++j) {
+    for(j = 0 ; j < 1024 ; ++j) {
       ident_addr &= 0xfffc00fff; // Clear middle 10 bits
       ident_addr |= (j << 12); // Set the appropriate value
       *(_page_tables+(i*1024)+j) = ident_addr; 
@@ -159,6 +159,27 @@ unsigned paging_alloc(int control)
     }
   }
 
+  if(phys_addr == 0) {
+    return 0;
+  }
+
+  // By our setup we assume pages are already alloc'ed and mapped
+  // this is _NOT_ a good general assumption and would need to
+  // be changed to support processes/multiple address spaces
+  for(i = 0 ; i < 1024 ; ++i) {
+      unsigned* table = (unsigned*)cur_pd.page_dir[i];
+    for(j = 0 ; j < 1024 ; ++j) {
+      if(!BIT_TEST(table[j], 1)) { // Not present
+        table[j]  = phys_addr;
+        table[j] |= control;
+        table[j] |= 1; // Make sure we set the present bit 
+        pi = i;
+        pj = j;
+        break;
+      }
+    }
+  }
+
 #if 0
   // Find physical slice
   for(i = 0 ; i < (1024*32) ; ++i) {
@@ -183,7 +204,8 @@ unsigned paging_alloc(int control)
     cur_pd.page_dir[i] = ((unsigned)cur_pd.page_tables_phys + pi*1024) | control;
   }
 
-  return page;
+  //return page;
+  return (pi << 22) | (pj << 12);
 }
 
 // This method does not error check and it probably should.

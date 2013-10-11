@@ -59,6 +59,11 @@ int idt_init()
   set_idt_gate(29, (unsigned)&isr29 + KERNEL_VIRT_BADDR, 0x08, 0x07);
   set_idt_gate(30, (unsigned)&isr30 + KERNEL_VIRT_BADDR, 0x08, 0x07);
   set_idt_gate(31, (unsigned)&isr31 + KERNEL_VIRT_BADDR, 0x08, 0x07);
+  set_idt_gate(32, (unsigned)&isr32 + KERNEL_VIRT_BADDR, 0x08, 0x07);
+  set_idt_gate(33, (unsigned)&isr33 + KERNEL_VIRT_BADDR, 0x08, 0x07);
+  set_idt_gate(34, (unsigned)&isr34 + KERNEL_VIRT_BADDR, 0x08, 0x07);
+  set_idt_gate(35, (unsigned)&isr35 + KERNEL_VIRT_BADDR, 0x08, 0x07);
+  set_idt_gate(36, (unsigned)&isr36 + KERNEL_VIRT_BADDR, 0x08, 0x07);
 
   idt_load(&idt);
   return 1;

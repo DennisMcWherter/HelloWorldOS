@@ -15,14 +15,15 @@
 #define NUM_INTERRUPTS 256
 isr_func_t handler[NUM_INTERRUPTS] = { 0 };
 
-void interrupt_handler(unsigned data_seg, registers_t regs, unsigned intno)
+
+void interrupt_handler(unsigned data_seg, registers_t regs)
 {
-  if(handler[intno] != 0) {
-    handler[intno](data_seg, regs);
+  if(handler[regs.intnum] != 0) {
+    handler[regs.intnum](data_seg, regs);
   } else {
-    k_printf("Unhandled interrupt: %d\n", intno);
+    k_printf("Unhandled interrupt: %d\n", regs.intnum);
   }
-  pic_eoi(intno);
+  pic_eoi(regs.intnum);
 }
 
 // Returns 1 on success 0 otherwise

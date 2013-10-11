@@ -16,8 +16,17 @@
 .globl isr\num
 isr\num:
   cli # Disable interrupts while we handle
+  push 0
   push \num
   jmp isr_handler # Jump is important! We want same stackframe
+.endm
+
+.macro isr_err num
+.globl isr\num
+isr\num:
+  cli
+  push \num
+  jmp isr_handler
 .endm
 
 # void idt_load(idt_t*);
@@ -53,7 +62,7 @@ isr_handler:
   mov gs, cx
 
   popa # Pop the registers we saved
-  add esp, 0x04 # Pop the intno arg
+  add esp, 0x08 # Pop the intno & err arg
   sti # Re-enable interrupts
   iret # Return from interrupt
 
@@ -69,13 +78,13 @@ isr 4
 isr 5
 isr 6
 isr 7
-isr 8
+isr_err 8
 isr 9
-isr 10
-isr 11
-isr 12
-isr 13
-isr 14
+isr_err 10
+isr_err 11
+isr_err 12
+isr_err 13
+isr_err 14
 isr 15
 isr 16
 isr 17
@@ -93,4 +102,9 @@ isr 28
 isr 29
 isr 30
 isr 31
+isr 32
+isr 33
+isr 34
+isr 35
+isr 36
 

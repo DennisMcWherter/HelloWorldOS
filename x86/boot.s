@@ -84,16 +84,17 @@ boot_higherhalf:
   # void kernel_main()
   call kernel_main # Main function
 
+halt:
+  hlt
+  jmp halt
+
 end:
   cli # Disable interrupts
+  jmp halt
   # TODO: Check string is properly terminated (i.e. this crashes)
   #push exit_str
   #call write
   #add esp, 4
- 
-halt:
-  hlt
-  jmp halt
 
 ##
 # Read-only data
